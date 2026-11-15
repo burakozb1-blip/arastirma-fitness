@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bilgi Defteri · Fitness koçluğu için günlük 10 bilgi</title>
+<meta name="description" content="Her gün 10 fitness bilgisi yaz, ertesi gün hatırla, iki gün sonra uygula, aralıklı tekrar testleriyle kalıcı hale getir." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f6f1e6; --card:#fffdf8; --ink:#1d2433; --muted:#6b6f7a; --line:#e6dccb;
+    --new:#2f55d4; --new-bg:#e9eefc;
+    --mem:#b85f00; --mem-bg:#fdf0dc;
+    --sen:#17784a; --sen-bg:#e3f4ea;
+    --rev:#6a43b8; --rev-bg:#efe9fa;
+    --danger:#b42318;
+    --radius:18px;
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5;font-size:16px}
+  button{font:inherit;color:inherit}
+  .wrap{max-width:1000px;margin:0 auto;padding:32px 18px 64px}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  .pre{white-space:pre-wrap;overflow-wrap:anywhere}
+
+  /* ---------- Üst kısım ---------- */
+  header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+  .eyebrow{margin:0;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  h1{font-family:var(--serif);font-size:clamp(32px,5vw,46px);line-height:1.05;margin:4px 0 6px;letter-spacing:-.015em}
+  .sub{margin:0;color:var(--muted)}
+  .stats{display:flex;gap:8px;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 14px;min-width:78px}
+  .stat b{display:block;font-family:var(--serif);font-size:22px;line-height:1.2}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  .views{display:flex;gap:4px;background:#ece4d3;border-radius:14px;padding:4px;margin:24px 0 0;width:max-content;max-width:100%;overflow-x:auto}
+  .view-tab{border:0;background:transparent;border-radius:10px;padding:9px 16px;font-weight:700;font-size:14px;cursor:pointer;color:var(--muted);white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px}
+  .view-tab:hover{color:var(--ink)}
+  .view-tab.active{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .view-tab .count{font-size:12px;background:var(--paper);border-radius:999px;padding:1px 8px}
+  .show-sm{display:none}
+
+  .how{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:22px 0 20px}
+  .how .step{border-radius:14px;padding:12px 14px;font-size:14px;display:flex;flex-direction:column;gap:2px}
+  .how .step b{font-size:13px;letter-spacing:.02em}
+  .how .rev{background:var(--rev-bg)} .how .rev b{color:var(--rev)}
+  .how .new{background:var(--new-bg)} .how .new b{color:var(--new)}
+  .how .mem{background:var(--mem-bg)} .how .mem b{color:var(--mem)}
+  .how .sen{background:var(--sen-bg)} .how .sen b{color:var(--sen)}
+
+  /* ---------- Gün sekmeleri ---------- */
+  .daynav{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:thin}
+  .daypill{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px}
+  .daypill:hover{border-color:#cfc3ad}
+  .daypill.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .daypill.add{border-style:dashed;color:var(--new);background:transparent}
+  .daypill.add:hover{background:var(--new-bg)}
+  .dots{display:flex;gap:3px}
+  .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid}
+  .dot.new{border-color:var(--new)} .dot.mem{border-color:var(--mem)} .dot.sen{border-color:var(--sen)}
+  .dot.new.done{background:var(--new)} .dot.mem.done{background:var(--mem)} .dot.sen.done{background:var(--sen)}
+  .daypill.active .dot{border-color:#fff}
+  .daypill.active .dot.done{background:#fff}
+  .dot.na{opacity:.25}
+  .tick{color:var(--sen);font-weight:800}
+  .daypill.active .tick{color:#8ee0b4}
+
+  .dayhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:10px 0 4px}
+  .dtitle{font-family:var(--serif);font-size:30px;margin:2px 0 0;line-height:1.1}
+  .dayhead-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted)}
+  .chip.new.done{background:var(--new-bg);border-color:transparent;color:var(--new)}
+  .chip.mem.done{background:var(--mem-bg);border-color:transparent;color:var(--mem)}
+  .chip.sen.done{background:var(--sen-bg);border-color:transparent;color:var(--sen)}
+  .chip.rev.done{background:var(--rev-bg);border-color:transparent;color:var(--rev)}
+  .link-btn{background:none;border:0;padding:4px 2px;cursor:pointer;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:13px}
+  .link-btn:hover{color:var(--danger)}
+  .more-btn{background:none;border:0;padding:2px 0;cursor:pointer;color:var(--new);font-weight:700;font-size:13px}
+
+  /* ---------- Görev kartları ---------- */
+  .task{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 20px 20px 24px;margin-top:16px;position:relative;overflow:hidden}
+  .task::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}
+  .task.new{--accent:var(--new);--accent-bg:var(--new-bg)}
+  .task.mem{--accent:var(--mem);--accent-bg:var(--mem-bg)}
+  .task.sen{--accent:var(--sen);--accent-bg:var(--sen-bg)}
+  .task.rev, .task.bank{--accent:var(--rev);--accent-bg:var(--rev-bg)}
+  .task.statsv{--accent:var(--new);--accent-bg:var(--new-bg)}
+  .task.help{--accent:var(--ink)}
+  .task-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .task h2{font-family:var(--serif);font-size:21px;margin:0;display:flex;align-items:center;line-height:1.25}
+  .badge{flex:0 0 auto;display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--sans);font-weight:800;font-size:14px;margin-right:10px}
+  .hint{color:var(--muted);font-size:14px;margin:4px 0 0 38px}
+  .status{font-size:13px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--accent-bg);color:var(--accent);white-space:nowrap}
+  .task-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+  .empty{background:var(--paper);border:1px dashed var(--line);border-radius:12px;padding:16px;color:var(--muted);font-size:14px}
+  .first-hint{margin:12px 0 0;font-size:14px;color:var(--muted)}
+  .first-hint button{background:none;border:0;padding:0;cursor:pointer;color:var(--new);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+  .btn{border:0;border-radius:11px;padding:10px 18px;cursor:pointer;background:var(--accent,var(--ink));color:#fff;font-weight:700;font-size:15px;transition:filter .15s,transform .05s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#fff}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn.danger{color:var(--danger)}
+  .btn.no{background:var(--danger)}
+  .btn.yes{background:var(--sen)}
+  .icon-btn{border:1px solid var(--line);background:#fff;border-radius:10px;width:34px;height:34px;cursor:pointer;display:inline-grid;place-items:center;font-size:13px;flex:0 0 auto}
+  .icon-btn:hover{border-color:var(--accent,#cfc3ad)}
+
+  input[type=text], input[type=search], textarea, select{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink)}
+  select{width:auto;cursor:pointer}
+  input[type=text]:focus, input[type=search]:focus, textarea:focus, select:focus{outline:2px solid var(--accent,var(--ink));outline-offset:0;border-color:transparent}
+  textarea{resize:vertical;line-height:1.45}
+
+  /* Yeni bilgi kartları */
+  .ncards{display:grid;grid-template-columns:1fr;gap:14px}
+  .ncard{border:1px solid var(--line);border-radius:16px;padding:14px 16px 16px;background:#fffefb;display:grid;gap:10px}
+  .nc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .nc-top .num{font-weight:800;color:var(--muted);font-size:13px}
+  .nc-label{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 4px 2px}
+  .ncard .q{font-weight:700;font-size:17px;line-height:1.45;min-height:76px;padding:12px 14px;resize:vertical}
+  .ncard .a{font-size:16px;line-height:1.55;min-height:180px;padding:12px 14px}
+  .ncard .src{font-size:14px;padding:9px 12px}
+  .ncard.err{border-color:var(--danger);background:#fff6f5}
+
+  /* Hatırlama kartları */
+  .kcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;align-items:start}
+  .kc{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff;display:flex;flex-direction:column;gap:8px}
+  .kc.learned{border-color:var(--mem);box-shadow:inset 0 0 0 1px var(--mem)}
+  .kc-num{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .kc-q{all:unset;cursor:pointer;font-weight:800;font-size:16px;line-height:1.35;border-radius:6px;overflow-wrap:anywhere}
+  .kc-q:focus-visible{outline:2px solid var(--mem);outline-offset:3px}
+  .kc-a{background:var(--mem-bg);color:#5a2f00;border-radius:10px;padding:10px 12px;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere}
+  .kc-src{font-size:12px;color:var(--muted);margin:0}
+  .kc-hint{font-size:13px;color:var(--muted)}
+  .toggle{width:100%;font-size:13px;font-weight:700;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px;cursor:pointer}
+  .toggle:hover{border-color:var(--mem)}
+  .toggle.on{background:var(--mem);border-color:var(--mem);color:#fff}
+
+  /* Uygulama */
+  .aplist{display:grid;gap:14px}
+  .ap{border-top:1px solid var(--line);padding-top:12px}
+  .ap:first-child{border-top:0;padding-top:0}
+  .ap-q{font-weight:800;overflow-wrap:anywhere}
+  .ap-a{color:var(--muted);font-size:14px;margin:2px 0 4px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .ap textarea{margin-top:4px}
+  .check{font-size:12.5px;margin-top:4px;color:var(--muted);font-weight:600}
+  .check.ok{color:var(--sen)} .check.warn{color:var(--mem)}
+  .clamp{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .open .clamp{display:block;-webkit-line-clamp:unset;overflow:visible}
+
+  /* Kart kart test */
+  .study{border:1px dashed var(--accent);border-radius:14px;padding:16px 18px;margin-top:16px;background:#fffdf6}
+  .task.rev .study, .task.bank .study{background:#faf7ff}
+  .quiz-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .study-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 18px;margin:10px 0 12px;cursor:pointer;min-height:140px}
+  .study-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .study-card .meta{margin:0;font-size:12px;color:var(--muted);text-align:center}
+  .study-card .q{font-family:var(--serif);font-size:23px;margin:8px 0;line-height:1.3;text-align:center;overflow-wrap:anywhere}
+  .study-card .reveal-hint{margin:0;font-size:13px;color:var(--muted);text-align:center}
+  .study-card .answer{margin-top:12px;background:var(--accent-bg);border-radius:12px;padding:12px 14px;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left}
+  .study-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .kbd{font-size:12px;color:var(--muted);margin:10px 0 0}
+  .fb{margin:10px 0 0;font-weight:600}
+  .fb.ok{color:var(--sen)}
+  .missed{margin:6px 0 0;padding-left:20px;font-size:14px}
+  .missed li{margin:4px 0}
+  .wsent{margin:6px 0 0;font-size:14px;font-style:italic;color:#4a4f5c;white-space:pre-wrap;overflow-wrap:anywhere}
+
+  /* Tüm bilgiler */
+  .bank-tools{display:flex;gap:8px;flex-wrap:wrap}
+  .bank-tools input{flex:1 1 240px;width:auto}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .fchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;cursor:pointer}
+  .fchip:hover{border-color:var(--accent)}
+  .fchip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .fchip span{opacity:.7;font-weight:600;margin-left:2px}
+  .wlist{margin-top:10px}
+  .wrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 2px;border-top:1px solid var(--line)}
+  .daytag{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:3px}
+  .daytag:hover{border-color:var(--accent);color:var(--accent)}
+  .w-q{font-weight:800;overflow-wrap:anywhere}
+  .w-a{color:#3d4250;font-size:15px;margin-top:2px;white-space:pre-wrap;overflow-wrap:anywhere}
+  .w-meta{font-size:12px;color:var(--muted);margin-top:4px}
+  .wflags{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+  .flag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:#a59d8d;background:transparent;white-space:nowrap}
+  .flag.mem.on{background:var(--mem-bg);color:var(--mem);border-color:transparent}
+  .flag.sen.on{background:var(--sen-bg);color:var(--sen);border-color:transparent}
+  button.flag{cursor:pointer}
+  button.flag:hover{border-color:var(--danger)}
+  .flag.hard.on{background:#fde8e6;color:var(--danger);border-color:transparent}
+  .flag.hard:not(.on){filter:grayscale(1);opacity:.75}
+
+  /* İstatistik */
+  .hero{display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap}
+  .hero-label{font-size:14px;font-weight:700;color:var(--muted)}
+  .hero-num{font-family:var(--sans);font-size:64px;font-weight:800;line-height:1;letter-spacing:-.02em;margin:4px 0 6px}
+  .hero-sub{font-size:14px;color:var(--muted)}
+  .hero-sub .up{color:var(--sen);font-weight:700}
+  .goal{flex:1 1 260px;min-width:220px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .goal-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px}
+  .meter{height:8px;border-radius:999px;background:#dfe6fb;overflow:hidden;margin:10px 0 8px}
+  .meter i{display:block;height:100%;background:var(--new);border-radius:999px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:18px}
+  .tile{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff}
+  .tile .l{font-size:13px;color:var(--muted);font-weight:700}
+  .tile .v{font-size:26px;font-weight:800;line-height:1.2;margin-top:2px}
+  .tile .s{font-size:12px;color:var(--muted)}
+  .chart-block{margin-top:26px}
+  .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .chart-block h3{font-family:var(--serif);font-size:19px;margin:0}
+  .legend{display:flex;gap:16px;font-size:13px;font-weight:600}
+  .legend .key{display:inline-block;width:16px;height:2px;border-radius:2px;vertical-align:middle;margin-right:6px}
+  .chart-wrap{position:relative}
+  .chart-wrap svg{display:block;max-width:100%;touch-action:pan-y}
+  .chart-wrap svg:focus-visible{outline:2px solid var(--new);outline-offset:4px;border-radius:6px}
+  .chart-wrap .grid{stroke:#ece5d6;stroke-width:1}
+  .chart-wrap .axis{stroke:#d6ccb8;stroke-width:1}
+  .chart-wrap .tick{font-size:11px;fill:var(--muted);font-family:var(--sans);font-variant-numeric:tabular-nums}
+  .chart-wrap .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .chart-wrap .endlbl{font-size:12px;font-weight:700;fill:var(--ink);font-family:var(--sans)}
+  .chart-wrap .xhair{stroke:#bdb3a0;stroke-width:1}
+  .tip{position:absolute;top:6px;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.08);white-space:nowrap;z-index:2}
+  .tip .d{color:var(--muted);font-size:12px;margin-bottom:4px}
+  .tip .r{display:flex;align-items:center;gap:8px}
+  .tip .r b{font-size:15px;min-width:22px}
+  .tip .k{width:12px;height:2px;border-radius:2px}
+  .upcoming{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+  .up-day{border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;background:#fff}
+  .up-day .n{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .up-day .d{font-size:11px;color:var(--muted);font-weight:700}
+  .up-day.today{border-color:var(--rev);box-shadow:inset 0 0 0 1px var(--rev)}
+  details.tbl{margin-top:8px;font-size:13px}
+  details.tbl summary{cursor:pointer;color:var(--muted);font-weight:600}
+  table.data{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  table.data th, table.data td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:left;white-space:nowrap}
+  table.data th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  table.data .num{text-align:right;font-variant-numeric:tabular-nums}
+  table.data .daytag{margin:0}
+
+  /* Yardım */
+  .help h3{font-family:var(--serif);font-size:19px;margin:22px 0 8px}
+  .help ol, .help ul{margin:0;padding-left:22px}
+  .help li{margin:7px 0}
+  .plan{width:100%;border-collapse:collapse;font-size:14px;margin-top:4px}
+  .plan th, .plan td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  .plan th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .plan td:first-child{font-weight:800}
+  .plan td.n{color:var(--new);font-weight:700} .plan td.m{color:var(--mem);font-weight:700} .plan td.s{color:var(--sen);font-weight:700}
+  .example{background:var(--paper);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:8px}
+  .example p{margin:3px 0}
+
+  .foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+  .foot-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .foot-actions label.btn{display:inline-block}
+  .loading{padding:40px 0;text-align:center;color:var(--muted)}
+
+  /* Giriş ekranı (Firebase) */
+  .login{position:fixed;inset:0;background:rgba(246,241,230,.97);display:grid;place-items:center;z-index:20;padding:20px;overflow:auto}
+  .login-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 24px;width:100%;max-width:380px;text-align:center}
+  .login-card h2{font-family:var(--serif);margin:0 0 8px}
+  .login-form{display:grid;gap:8px;margin-top:14px}
+  .login-form input{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink)}
+  .login-form input:focus{outline:2px solid var(--new);outline-offset:0;border-color:transparent}
+  .login-card .btn{width:100%}
+  .login-card .link-btn:hover{color:var(--new)}
+  .or{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted);font-size:13px}
+  .or::before,.or::after{content:'';flex:1;height:1px;background:var(--line)}
+  .login-msg{margin:10px 0 0;font-size:14px;font-weight:600;color:var(--danger);min-height:1em}
+  .login-msg.ok{color:var(--sen)}
+  .login-card button:disabled{opacity:.6;cursor:wait}
+
+  #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;font-size:14px;font-weight:600;z-index:30;max-width:min(92vw,520px);text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+
+  @media (max-width:820px){
+    .how{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:700px){
+    .ncards{grid-template-columns:1fr}
+  }
+  @media (max-width:640px){
+    .wrap{padding:22px 14px 56px}
+    .views{width:100%;flex-wrap:wrap}
+    .view-tab{flex:1 1 calc(50% - 4px);padding:9px 6px;font-size:13px}
+    .hide-sm{display:none}
+    .show-sm{display:inline}
+    .how{grid-template-columns:1fr;gap:6px}
+    .how .step{flex-direction:row;gap:8px;align-items:baseline;padding:9px 12px}
+    .how .step b{white-space:nowrap}
+    .task{padding:16px 14px 16px 18px}
+    .hint{margin-left:0}
+    .wrow{grid-template-columns:1fr;gap:6px}
+    .daytag{justify-self:start}
+    .wflags{justify-content:flex-start}
+    .dtitle{font-size:26px}
+    .hero-num{font-size:52px}
+    .upcoming{gap:4px}
+    .up-day{padding:6px 2px}
+    .up-day .n{font-size:17px}
+    table.data th, table.data td{padding:7px 4px;font-size:13px}
+    table.data th{letter-spacing:0;font-size:11px}
+    .plan th, .plan td{padding:7px 5px;font-size:13px}
+    .study-card .q{font-size:20px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="eyebrow">Fitness koçluğu · günlük öğrenme</p>
+      <h1>Bilgi Defteri</h1>
+      <p class="sub">Her gün 10 bilgi · ertesi gün hatırla · iki gün sonra uygula · sık sık tekrar</p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="views" role="tablist" aria-label="Bölümler">
+    <button type="button" class="view-tab active" role="tab" aria-selected="true" data-action="view" data-view="daily">📅 Günlük<span class="hide-sm"> çalışma</span></button>
+    <button type="button" class="view-tab" role="tab" aria-selected="false" data-action="view" data-view="bank">📚 <span class="hide-sm">Tüm bilgiler</span><span class="show-sm">Bilgiler</span> <span class="count" id="bank-count">0</span></button>
+    <button type="button" class="view-tab" role="tab" aria-selected="false" data-action="view" data-view="stats">📊 İstatistik</button>
+    <button type="button" class="view-tab" role="tab" aria-selected="false" data-action="view" data-view="help">❓ <span class="hide-sm">Nasıl kullanılır?</span><span class="show-sm">Yardım</span></button>
+  </div>
+
+  <!-- ============ GÜNLÜK ÇALIŞMA ============ -->
+  <div id="view-daily">
+    <section class="how" aria-label="Sistem nasıl işler">
+      <div class="step rev"><b>↻ TEKRAR</b><span>Zamanı gelen eski kartlarla kendini test et.</span></div>
+      <div class="step new"><b>1 · YAZ</b><span>Bugün 10 bilgiyi soru–cevap olarak yaz.</span></div>
+      <div class="step mem"><b>2 · HATIRLA</b><span>Dünkü bilgileri hatırla, kendini test et.</span></div>
+      <div class="step sen"><b>3 · UYGULA</b><span>İki gün önceki bilgileri işine nasıl katacağını yaz.</span></div>
+    </section>
+    <nav class="daynav" id="daynav" aria-label="Günler"></nav>
+    <main id="day">
+      <div class="loading" id="loading">Yükleniyor…</div>
+      <div id="dayhead"></div>
+      <div id="sec-rev"></div>
+      <div id="sec-new"></div>
+      <div id="sec-mem"></div>
+      <div id="sec-sen"></div>
+    </main>
+  </div>
+
+  <!-- ============ TÜM BİLGİLER ============ -->
+  <div id="view-bank" hidden>
+    <section class="task bank">
+      <div class="task-head">
+        <div>
+          <h2>Tüm bilgiler</h2>
+          <p class="hint" style="margin-left:0">Bugüne kadar yazdığın bütün bilgiler, kaynakları ve uygulama notlarınla. Ara, filtrele, istediğin listeyle tekrar çalış.</p>
+        </div>
+        <span class="status" id="bank-status"></span>
+      </div>
+      <div class="bank-tools">
+        <input type="search" id="bank-q" placeholder="Ara: soru, cevap, kaynak ya da not…" aria-label="Bilgi ara" autocomplete="off">
+        <select id="bank-sort" aria-label="Sıralama">
+          <option value="new">Yeni günler önce</option>
+          <option value="old">Eski günler önce</option>
+          <option value="due">Tekrar tarihine göre</option>
+        </select>
+      </div>
+      <div class="filters" id="bank-filters"></div>
+      <div class="task-foot" id="bank-actions"></div>
+      <div id="study"></div>
+      <div id="bank-list"></div>
+    </section>
+  </div>
+
+  <!-- ============ İSTATİSTİK ============ -->
+  <div id="view-stats" hidden>
+    <section class="task statsv">
+      <div class="task-head">
+        <div>
+          <h2>İstatistik</h2>
+          <p class="hint" style="margin-left:0">Bir bilgiyi “Hatırladım” diye işaretlediğinde ya da bir testte bildiğinde öğrenilmiş sayılır.</p>
+        </div>
+      </div>
+      <div id="stats-body"></div>
+    </section>
+  </div>
+
+  <!-- ============ NASIL KULLANILIR ============ -->
+  <div id="view-help" hidden>
+    <section class="task help">
+      <h2 style="margin:0">Bu defterle nasıl çalışırım?</h2>
+      <p class="muted" style="margin:6px 0 0">Günde 20–30 dakika yeter. Her bilgi önce üç gün seninle: <b>yazılır → hatırlanır → işine uygulanır.</b> Sonra aralıklı tekrar testleriyle kalıcı hale gelir.</p>
+
+      <h3>Her gün</h3>
+      <ol>
+        <li><b>Günü aç.</b> Son gün açık gelir. Yeni bir güne başlıyorsan gün sekmelerinin sonundaki <b>+ Yeni gün</b>'e bas.</li>
+        <li><b>Tekrar testi (mor).</b> En üstte o gün tekrar zamanı gelen eski kartlar bekler. <b>Teste başla</b>'ya bas, soruyu oku, cevabı önce kendin söyle, sonra kartı açıp <b>Bildim</b> ya da <b>Bilemedim</b> de.</li>
+        <li><b>Hatırla (turuncu).</b> Dünkü 10 kartın sorusunu oku, cevabı söyle, soruya dokunup kontrol et. <b>Hatırladım</b> de ya da <b>Kendini test et</b> ile kart kart geç.</li>
+        <li><b>Uygula (yeşil).</b> İki gün önceki bilgilerden en az 3 tanesi için “bunu işimde nasıl kullanırım?” sorusunu cevapla.</li>
+        <li><b>Yaz (mavi).</b> Bugünün 10 bilgisini soru–cevap olarak yaz, istersen kaynağını ekle, <b>Bilgileri kaydet</b>'e bas.</li>
+      </ol>
+
+      <h3>Sık tekrar nasıl çalışıyor?</h3>
+      <ul>
+        <li>Bir bilgiyi ilk kez hatırladığında 1 gün sonra yeniden sorulur.</li>
+        <li>Her bildiğinde aralık uzar: <b>1 → 3 → 7 → 14 → 30 → 60 gün</b>.</li>
+        <li><b>Bilemediğin</b> kart ertesi gün yine gelir ve <b>🔁 zor</b> olarak işaretlenir.</li>
+        <li>Böylece zorlandığın bilgiler sık sık, iyi bildiklerin daha seyrek karşına çıkar.</li>
+        <li>İstediğin an <b>Rastgele 10 kartla test</b> yapabilir ya da <b>Tüm bilgiler</b> sekmesinde istediğin listeyle çalışabilirsin.</li>
+      </ul>
+
+      <h3>İyi bir bilgi kartı nasıl yazılır?</h3>
+      <ul>
+        <li><b>Soru olarak yaz.</b> “Protein önemlidir” yazarsan kendini test edemezsin; “Kas gelişimi için günde ne kadar protein?” yazarsan edersin.</li>
+        <li><b>Cevap istediğin kadar uzun olabilir.</b> Madde madde de yazabilirsin; satır başları korunur. Testte önce özünü söylemeye çalış, sonra tamamını oku.</li>
+        <li><b>Kaynağı ekle.</b> Kitap, makale, kurs ya da video adı; sonra dönüp bakmak istediğinde işine yarar.</li>
+      </ul>
+      <div class="example">
+        <p><b>Soru:</b> Kas gelişimi hedefleyen biri günde ne kadar protein almalı?</p>
+        <p><b>Cevap:</b> Yaklaşık 1,6 g/kg; fayda en fazla ~2,2 g/kg'a kadar artıyor.</p>
+        <p><b>Uygulama (2 gün sonra):</b> Yarın iki danışanımın protein hedefini kilolarına göre hesaplayıp planlarına ekleyeceğim.</p>
+      </div>
+
+      <h3>Hangi gün ne yapılır?</h3>
+      <table class="plan">
+        <thead><tr><th>Gün</th><th>Yaz</th><th>Hatırla</th><th>Uygula</th></tr></thead>
+        <tbody>
+          <tr><td>1. gün</td><td class="n">1. günün bilgileri</td><td>—</td><td>—</td></tr>
+          <tr><td>2. gün</td><td class="n">2. günün bilgileri</td><td class="m">1. günün bilgileri</td><td>—</td></tr>
+          <tr><td>3. gün</td><td class="n">3. günün bilgileri</td><td class="m">2. günün bilgileri</td><td class="s">1. günün bilgileri</td></tr>
+          <tr><td>4. gün</td><td class="n">4. günün bilgileri</td><td class="m">3. günün bilgileri</td><td class="s">2. günün bilgileri</td></tr>
+        </tbody>
+      </table>
+      <p class="muted small">Tekrar testi bunlara ek olarak her gün çıkar.</p>
+
+      <h3>Bilmen gerekenler</h3>
+      <ul>
+        <li><b>Bir gün kaçırırsan</b> sorun yok: gün numaraları senin çalışmana göre ilerler, tekrar testleri de bekleyip sen döndüğünde çıkar.</li>
+        <li>Yanlışlıkla açtığın son günü gün başlığının yanındaki <b>Bu günü sil</b> ile kaldırabilirsin.</li>
+        <li id="storage-note">Veriler bu tarayıcıda durur; ara sıra en alttaki <b>Dışa aktar</b> ile yedek al.</li>
+      </ul>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span id="store-label"></span>
+    <div class="foot-actions">
+      <button class="btn ghost sm" type="button" data-action="export">Dışa aktar (JSON)</button>
+      <label class="btn ghost sm" title="Seçtiğin yedek, mevcut verilerin yerine geçer">İçe aktar<input type="file" id="import-file" accept="application/json,.json" hidden /></label>
+      <button class="btn ghost sm" type="button" data-action="logout" id="logout-btn" hidden>Çıkış yap</button>
+      <button class="btn ghost sm danger" type="button" data-action="reset">Sıfırla</button>
+    </div>
+  </footer>
+</div>
+
+<div id="login" class="login" hidden>
+  <div class="login-card">
+    <h2>Bilgi Defteri</h2>
+    <p class="muted small">Bilgilerin her cihazda aynı olsun diye giriş yap. <b>Her cihazda aynı yöntemle gir</b>, yoksa farklı bir defter açılır.</p>
+    <form id="email-form" class="login-form">
+      <input type="email" id="login-email" placeholder="E-posta adresin" autocomplete="email" autocapitalize="off" spellcheck="false" aria-label="E-posta">
+      <input type="password" id="login-pass" placeholder="Şifre (en az 6 karakter)" autocomplete="current-password" aria-label="Şifre">
+      <button class="btn" type="submit" id="signin-btn">Giriş yap</button>
+      <button class="btn ghost" type="button" id="signup-btn">İlk kez mi? Yeni hesap oluştur</button>
+      <button class="link-btn" type="button" id="reset-btn">Şifremi unuttum</button>
+    </form>
+    <div class="or"><span>ya da</span></div>
+    <button class="btn ghost" type="button" id="login-btn">Google ile giriş yap</button>
+    <p class="muted small" style="margin:8px 0 0">Google girişi bazı telefonlarda çalışmıyor; orada e-posta ile gir.</p>
+    <p id="login-msg" class="login-msg" role="alert"></p>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   AYARLAR — Kelime Defteri ile aynı Firebase projesi, ayrı bölüm (users/{uid}/bilgiGunleri)
+   ===================================================================== */
+const CONFIG = {
+  USE_FIREBASE: true,
+  FIREBASE_VERSION: '12.17.1',
+  firebaseConfig: {
+    apiKey: 'AIzaSyAr53FcuLKmGmnZ7LPqiomHZxVRozHsxuY',
+    authDomain: 'kelimeing.firebaseapp.com',
+    projectId: 'kelimeing',
+    storageBucket: 'kelimeing.firebasestorage.app',
+    messagingSenderId: '617416136728',
+    appId: '1:617416136728:web:f600b4954ec05ed4750b6d'
+  }
+};
+
+const PER_DAY = 10;                       // günde yazılacak bilgi
+const APPLY_GOAL = 3;                     // "Uygula" adımında en az kaç bilgi
+const INTERVALS = [0, 1, 3, 7, 14, 30, 60]; // tekrar seviyesi → kaç gün sonra yeniden sorulur
+const MAX_BOX = INTERVALS.length - 1;
+const QUICK_TEST = 10;                    // rastgele testteki kart sayısı
+const LS_KEY = 'bilgiDefteri.v1';
+const FB_COLLECTION = 'bilgiGunleri';
+const ART_PREFIX = 'bgun-';
+const TASKS = ['new', 'mem', 'sen'];
+
+// Yeni kartlarda gri örnek olarak görünen soru/cevaplar
+const EXAMPLES = [
+  ['Gluteus medius’un ana görevi ne?', 'Kalçayı yana açmak ve tek bacakta pelvisi dengede tutmak.'],
+  ['Kas gelişimi için günde ne kadar protein?', 'Yaklaşık 1,6 g/kg; fayda en fazla ~2,2 g/kg’a kadar artıyor.'],
+  ['Hipertrofi için kas başına haftalık kaç set iyi bir başlangıç?', 'Yaklaşık 10–20 set.'],
+  ['Squat’ta diz içe çökerse hangi komutu veririm?', '“Dizlerini ayak parmaklarının yönüne it.”'],
+  ['Ayak bileği dorsifleksiyonu kısıtlıysa squat’ta ne görülür?', 'Topuk kalkar ya da gövde fazla öne eğilir.'],
+  ['RIR ne demek?', 'Setin sonunda yapabileceğin kalan tekrar sayısı. RIR 2 = 2 tekrar daha yapabilirdin.'],
+  ['Progresif yüklenme nedir?', 'Ağırlığı, tekrarı ya da seti zamanla kademeli artırıp vücuda sürekli yeni bir uyaran vermek.'],
+  ['Kreatin monohidratın yaygın günlük dozu ne?', 'Günde 3–5 g.'],
+  ['Yeni danışanda ilk alışkanlık hedefi nasıl olmalı?', 'Küçük ve ölçülebilir; ör. haftada 3 gün 20 dk yürüyüş.'],
+  ['Bugün öğrendiğim yeni bilgi ne?', 'İstediğin kadar uzun yazabilirsin, madde madde de olur.']
+];
+
+/* Bir gün: { n, date, items: [ { id, q, a, src, learned, learnedAt, apply, hard, box, due, lastReview } ] }
+   box/due -> aralıklı tekrar: box seviyesi kaç gün sonra sorulacağını belirler, due o tarih */
+const state = {
+  days: [], active: 1, flipped: new Set(), dirty: false,
+  view: 'daily',
+  bank: { q: '', filter: 'all', sort: 'new' },
+  study: null
+};
+
+/* ---------- Yardımcılar ---------- */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const dayByN = n => state.days.find(d => d.n === n);
+const lastN = () => state.days.reduce((m, d) => Math.max(m, d.n), 0);
+const findItem = (day, id) => { const d = dayByN(day); return d ? d.items.find(i => i.id === id) : null; };
+const appliedCount = d => d.items.filter(i => i.apply.trim()).length;
+const allItems = () => state.days.flatMap(d => d.items.map(it => ({ it, day: d.n })));
+const DAY_MS = 86400000;
+const addDays = (s, k) => new Date(Date.parse(s + 'T00:00:00Z') + k * DAY_MS).toISOString().slice(0, 10);
+const isLong = s => s.length > 240 || s.split('\n').length > 4;
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function fmtDate(s) {
+  try { return new Date(s + 'T00:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' }); }
+  catch (e) { return s; }
+}
+const shortDate = s => { try { return new Date(s + 'T00:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }); } catch (e) { return s; } };
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function autosize(el) {
+  if (!el || el.offsetParent === null) return;
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight + 2, 640) + 'px';
+}
+let toastTimer;
+function toast(msg) {
+  const el = $('#toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+let pending = null;
+function confirmTwice(key, msg) {
+  const now = Date.now();
+  if (pending && pending.key === key && now - pending.t < 5000) { pending = null; return true; }
+  pending = { key, t: now }; toast(msg); return false;
+}
+function newDay(n) { return { n, date: todayStr(), items: [] }; }
+
+function normalize(days) {
+  if (!Array.isArray(days)) return [];
+  const seen = new Set();
+  return days
+    .filter(d => d && Number.isInteger(+d.n) && +d.n > 0 && !seen.has(+d.n) && seen.add(+d.n))
+    .map(d => ({
+      n: +d.n,
+      date: typeof d.date === 'string' ? d.date : todayStr(),
+      items: (Array.isArray(d.items) ? d.items : [])
+        .filter(it => it && String(it.q || '').trim())
+        .slice(0, PER_DAY)
+        .map(it => {
+          const learned = !!it.learned;
+          const learnedAt = typeof it.learnedAt === 'string' ? it.learnedAt : '';
+          let box = Number.isInteger(it.box) ? Math.max(0, Math.min(MAX_BOX, it.box)) : (learned ? 1 : 0);
+          if (!learned) box = 0;
+          const due = typeof it.due === 'string' && it.due ? it.due : (learned ? addDays(learnedAt || todayStr(), 1) : '');
+          return {
+            id: String(it.id || uid()),
+            q: String(it.q).trim(), a: String(it.a || '').trim(), src: String(it.src || '').trim(),
+            learned, learnedAt, apply: String(it.apply || ''), hard: !!it.hard,
+            box, due, lastReview: typeof it.lastReview === 'string' ? it.lastReview : ''
+          };
+        })
+    }))
+    .sort((a, b) => a.n - b.n);
+}
+
+/* =====================================================================
+   ARALIKLI TEKRAR
+   Bildin → seviye bir artar, aralık uzar (1, 3, 7, 14, 30, 60 gün).
+   Bilemedin → ertesi gün yeniden sorulur ve "zor" olur.
+   ===================================================================== */
+function schedule(it, ok, firstTime) {
+  const today = todayStr();
+  if (ok) {
+    if (!it.learned) { it.learned = true; it.learnedAt = today; }
+    it.box = Math.min((it.box || 0) + 1, MAX_BOX);
+    it.due = addDays(today, INTERVALS[it.box]);
+    it.hard = false;
+  } else {
+    if (firstTime) { it.learned = false; it.learnedAt = ''; it.box = 0; }
+    else it.box = 1;
+    it.due = addDays(today, 1);
+    it.hard = true;
+  }
+  it.lastReview = today;
+}
+// Bugün tekrar zamanı gelen kartlar: son iki günün kartları hariç (onlar Yaz/Hatırla adımlarında)
+function isDue(it, day, today) {
+  if (day >= lastN() - 1) return false;
+  return it.box === 0 || !it.due || it.due <= today;
+}
+function dueItems() {
+  const today = todayStr();
+  return allItems().filter(({ it, day }) => isDue(it, day, today));
+}
+
+/* =====================================================================
+   VERİ KATMANI — Ortak arayüz: init(), loadDays(), saveDay(day), deleteDay(n), replaceAll(days)
+   ===================================================================== */
+let memoryCopy = null;
+const LocalStore = {
+  label: 'Veriler bu tarayıcıda saklanıyor',
+  note: 'Veriler <b>sadece bu tarayıcıda</b> durur. Tarayıcı verilerini silersen kaybolur; ara sıra en alttaki <b>Dışa aktar</b> ile yedek al.',
+  async init() {},
+  async loadDays() {
+    try { const raw = localStorage.getItem(LS_KEY); if (raw) return JSON.parse(raw); } catch (e) {}
+    return memoryCopy || [];
+  },
+  _write() {
+    memoryCopy = JSON.parse(JSON.stringify(state.days));
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state.days)); } catch (e) {}
+  },
+  async saveDay() { this._write(); },
+  async deleteDay() { this._write(); },
+  async replaceAll() { this._write(); }
+};
+
+const FirebaseStore = {
+  label: 'Veriler Firebase’de saklanıyor',
+  note: 'Bilgiler <b>Firebase’de</b> saklanır: aynı hesapla girdiğin her cihazda aynı bilgileri görürsün. Kelime Defteri ile aynı hesabı kullanır ama verileri ayrı tutar.',
+  fs: null, db: null, auth: null, authMod: null, uid: null,
+  async init() {
+    const base = `https://www.gstatic.com/firebasejs/${CONFIG.FIREBASE_VERSION}`;
+    const [appMod, fs, authMod] = await Promise.all([
+      import(`${base}/firebase-app.js`), import(`${base}/firebase-firestore.js`), import(`${base}/firebase-auth.js`)
+    ]);
+    const app = appMod.initializeApp(CONFIG.firebaseConfig);
+    this.fs = fs; this.authMod = authMod;
+    this.db = fs.getFirestore(app);
+    this.auth = authMod.getAuth(app);
+    let user = await new Promise(res => {
+      let done = false, off = null;
+      off = authMod.onAuthStateChanged(this.auth, u => {
+        if (done) return; done = true;
+        if (off) off(); else setTimeout(() => off && off(), 0);
+        res(u);
+      });
+    });
+    if (!user) user = await askLogin(this);
+    this.uid = user.uid;
+    this.label = `Firebase’e bağlı · ${user.email || 'giriş yapıldı'}`;
+  },
+  col() { return this.fs.collection(this.db, 'users', this.uid, FB_COLLECTION); },
+  ref(n) { return this.fs.doc(this.db, 'users', this.uid, FB_COLLECTION, String(n)); },
+  async loadDays() { const snap = await this.fs.getDocs(this.col()); const out = []; snap.forEach(d => out.push(d.data())); return out; },
+  async saveDay(day) { await this.fs.setDoc(this.ref(day.n), day); },
+  async deleteDay(n) { await this.fs.deleteDoc(this.ref(n)); },
+  async replaceAll(days) {
+    const snap = await this.fs.getDocs(this.col());
+    await Promise.all(snap.docs.map(d => this.fs.deleteDoc(d.ref)));
+    await Promise.all(days.map(d => this.fs.setDoc(this.ref(d.n), d)));
+  },
+  async logout() { await this.authMod.signOut(this.auth); location.reload(); }
+};
+
+/* claude.ai'da link olarak açıldığında: veriler kullanıcının Claude hesabında */
+const ArtifactStore = {
+  label: 'Veriler Claude hesabında saklanıyor · her cihazda aynı',
+  note: 'Bu linkte bilgiler <b>Claude hesabında</b> saklanır: telefonda ve bilgisayarda aynı hesapla açınca aynı bilgileri görürsün.',
+  db: null, uid: null, _pending: {}, _running: {},
+  async init() {
+    const db = await window.claude.use('db');
+    const user = db ? await window.claude.use('user') : null;
+    const id = user ? await user.id() : null;
+    if (!db || !id) throw new Error('Claude hesabına bağlanılamadı');
+    this.db = db; this.uid = id;
+  },
+  col() { return this.db.collection('data/users/' + this.uid); },
+  key(n) { return ART_PREFIX + n; },
+  async loadDays() {
+    const snap = await this.col().get();
+    return snap.docs.filter(d => d.exists && d.id.startsWith(ART_PREFIX)).map(d => d.data());
+  },
+  async _set(key, body) {
+    try { await this.col().doc(key).set(body); }
+    catch (e) {
+      if (!e || e.code !== 'unavailable') throw e;
+      await new Promise(r => setTimeout(r, 400 + Math.random() * 800));
+      await this.col().doc(key).set(body);
+    }
+  },
+  saveDay(day) {
+    const key = this.key(day.n);
+    this._pending[key] = JSON.parse(JSON.stringify(day));
+    if (!this._running[key]) this._running[key] = this._drain(key);
+    return this._running[key];
+  },
+  async _drain(key) {
+    try {
+      while (this._pending[key]) {
+        const body = this._pending[key]; delete this._pending[key];
+        await this._set(key, body);
+      }
+    } finally { delete this._running[key]; }
+  },
+  async deleteDay(n) {
+    const key = this.key(n);
+    delete this._pending[key];
+    if (this._running[key]) { try { await this._running[key]; } catch (e) {} }
+    await this.col().doc(key).delete();
+  },
+  async replaceAll(days) {
+    const keep = new Set(days.map(d => this.key(d.n)));
+    const snap = await this.col().get();
+    for (const d of snap.docs) if (d.id.startsWith(ART_PREFIX) && !keep.has(d.id)) await this.deleteDay(+d.id.slice(ART_PREFIX.length));
+    for (const d of days) await this.saveDay(d);
+  }
+};
+const inArtifact = () => !!(window.claude && typeof window.claude.use === 'function');
+
+function authError(e) {
+  const c = (e && e.code) || '';
+  const m = {
+    'auth/invalid-credential': 'E-posta ya da şifre yanlış. Hesabın yoksa “Yeni hesap oluştur”a bas.',
+    'auth/invalid-login-credentials': 'E-posta ya da şifre yanlış. Hesabın yoksa “Yeni hesap oluştur”a bas.',
+    'auth/wrong-password': 'Şifre yanlış.',
+    'auth/user-not-found': 'Bu e-postayla hesap yok. “Yeni hesap oluştur”a bas.',
+    'auth/email-already-in-use': 'Bu e-postayla zaten bir hesap var. Şifreni yazıp “Giriş yap”a bas.',
+    'auth/weak-password': 'Şifre en az 6 karakter olmalı.',
+    'auth/invalid-email': 'E-posta adresi geçersiz görünüyor.',
+    'auth/missing-email': 'Önce e-posta adresini yaz.',
+    'auth/missing-password': 'Şifreni yaz.',
+    'auth/operation-not-allowed': 'Bu giriş yöntemi Firebase’de açılmamış (Authentication → Sign-in method).',
+    'auth/popup-blocked': 'Açılır pencere engellendi. E-posta ile giriş yap.',
+    'auth/popup-closed-by-user': 'Google penceresi kapatıldı. Telefondaysan e-posta ile giriş yap.',
+    'auth/cancelled-popup-request': '',
+    'auth/network-request-failed': 'İnternet bağlantısı yok gibi görünüyor.',
+    'auth/too-many-requests': 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.',
+    'auth/unauthorized-domain': 'Bu site Firebase’de izinli alan adı olarak eklenmemiş.'
+  };
+  return c in m ? m[c] : 'Giriş yapılamadı: ' + (c || (e && e.message) || e);
+}
+
+function askLogin(fb) {
+  const A = fb.authMod;
+  return new Promise(resolve => {
+    $('#login').hidden = false;
+    const msg = (t, ok) => { const el = $('#login-msg'); el.textContent = t || ''; el.classList.toggle('ok', !!ok); };
+    const creds = () => ({ email: $('#login-email').value.trim(), pass: $('#login-pass').value });
+    const buttons = $$('#login button');
+    const run = async fn => {
+      msg(''); buttons.forEach(b => { b.disabled = true; });
+      try { const r = await fn(); if (r && r.user) { $('#login').hidden = true; resolve(r.user); } }
+      catch (e) { console.error(e); msg(authError(e)); }
+      finally { buttons.forEach(b => { b.disabled = false; }); }
+    };
+    const check = needPass => {
+      const { email, pass } = creds();
+      if (!email) { msg('Önce e-posta adresini yaz.'); $('#login-email').focus(); return null; }
+      if (needPass && pass.length < 6) { msg('Şifre en az 6 karakter olmalı.'); $('#login-pass').focus(); return null; }
+      return { email, pass };
+    };
+    $('#email-form').onsubmit = e => {
+      e.preventDefault();
+      const c = check(true); if (!c) return;
+      run(() => A.signInWithEmailAndPassword(fb.auth, c.email, c.pass));
+    };
+    $('#signup-btn').onclick = () => {
+      const c = check(true); if (!c) return;
+      run(() => A.createUserWithEmailAndPassword(fb.auth, c.email, c.pass));
+    };
+    $('#reset-btn').onclick = () => {
+      const c = check(false); if (!c) return;
+      run(async () => {
+        await A.sendPasswordResetEmail(fb.auth, c.email);
+        msg('Şifre sıfırlama e-postası gönderildi. Gelen kutunu ve spam klasörünü kontrol et.', true);
+      });
+    };
+    $('#login-btn').onclick = () => run(() => A.signInWithPopup(fb.auth, new A.GoogleAuthProvider()));
+  });
+}
+
+let Store = LocalStore;
+async function persist(fn) {
+  try { await fn(); }
+  catch (e) { console.error(e); toast('Kaydedilemedi: ' + (e.message || e)); }
+}
+
+/* =====================================================================
+   GÖREV DURUMU — [N. gün yazıldı mı, (N-1) hatırlandı mı, (N-2) uygulandı mı]
+   ===================================================================== */
+function progress(n) {
+  const d = dayByN(n), p1 = dayByN(n - 1), p2 = dayByN(n - 2);
+  return [
+    d && d.items.length >= PER_DAY ? 'done' : 'todo',
+    !p1 || !p1.items.length ? 'na' : p1.items.every(i => i.learned) ? 'done' : 'todo',
+    !p2 || !p2.items.length ? 'na' : appliedCount(p2) >= Math.min(APPLY_GOAL, p2.items.length) ? 'done' : 'todo'
+  ];
+}
+function applyInfo(text) {
+  const s = String(text || '').trim();
+  if (!s) return { cls: '', text: 'Henüz yazmadın' };
+  if (s.split(/\s+/).length < 4) return { cls: 'warn', text: 'Biraz daha somut yaz: kime, ne zaman, nasıl?' };
+  return { cls: 'ok', text: '✓ Uygulama notu yazıldı' };
+}
+// Uzun metinler için "Tamamını göster" bağlantısı
+const longText = (cls, text) => isLong(text)
+  ? `<div class="${cls} clamp">${esc(text)}</div><button type="button" class="more-btn" data-action="expand">Tamamını göster</button>`
+  : `<div class="${cls}">${esc(text)}</div>`;
+
+/* =====================================================================
+   ÇİZİM
+   ===================================================================== */
+function render() {
+  renderMeta(); renderReview(); renderNew(); renderMem(); renderSen();
+  if (state.view === 'bank') renderBank();
+  if (state.view === 'stats') renderStatsView();
+}
+function renderMeta() { renderStats(); renderNav(); renderDayHead(); }
+
+function renderStats() {
+  const all = state.days.flatMap(d => d.items);
+  const items = [
+    [state.days.length, 'gün'],
+    [all.length, 'bilgi'],
+    [all.filter(i => i.learned).length, 'öğrenildi'],
+    [dueItems().length, 'bugün tekrar']
+  ];
+  $('#stats').innerHTML = items.map(([v, l]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+  $('#bank-count').textContent = all.length;
+}
+
+function renderNav() {
+  const nav = $('#daynav');
+  nav.innerHTML = state.days.map(d => {
+    const pr = progress(d.n);
+    const complete = !pr.includes('todo');
+    return `<button type="button" class="daypill ${d.n === state.active ? 'active' : ''}" data-action="goto" data-n="${d.n}" title="${esc(fmtDate(d.date))}">
+      ${d.n}. Gün
+      <span class="dots" aria-hidden="true">${pr.map((s, i) => `<i class="dot ${TASKS[i]} ${s}"></i>`).join('')}</span>
+      ${complete ? '<span class="tick" aria-label="tamamlandı">✓</span>' : ''}
+    </button>`;
+  }).join('') + '<button type="button" class="daypill add" data-action="new-day">+ Yeni gün</button>';
+  const act = $('.daypill.active', nav);
+  if (act) nav.scrollLeft = Math.max(0, act.offsetLeft - nav.clientWidth / 2 + act.clientWidth / 2);
+}
+
+function renderDayHead() {
+  const d = dayByN(state.active);
+  const pr = progress(d.n);
+  const labels = ['10 bilgi', 'Hatırlama', 'Uygulama'];
+  let chips = '';
+  if (d.n === lastN() && allItems().some(x => x.day < d.n - 1)) {
+    const left = dueItems().length;
+    chips += `<span class="chip rev ${left ? 'todo' : 'done'}">${left ? `Tekrar: ${left} kart` : '✓ Tekrar'}</span>`;
+  }
+  chips += pr.map((s, i) => s === 'na' ? '' :
+    `<span class="chip ${TASKS[i]} ${s}">${s === 'done' ? '✓ ' : ''}${labels[i]}</span>`).join('');
+  const canDelete = d.n === lastN() && d.n > 1;
+  $('#dayhead').innerHTML = `<div class="dayhead">
+      <div>
+        <p class="eyebrow">${esc(fmtDate(d.date))}${d.date === todayStr() ? ' · bugün' : ''}</p>
+        <h2 class="dtitle">${d.n}. Gün</h2>
+      </div>
+      <div class="dayhead-right">
+        <div class="chips">${chips}</div>
+        ${canDelete ? '<button type="button" class="link-btn" data-action="delete-day">Bu günü sil</button>' : ''}
+      </div>
+    </div>`;
+}
+
+/* ---- ↻ Bugünün tekrar testi (sadece en son günde) ---- */
+function renderReview() {
+  const el = $('#sec-rev');
+  if (state.active !== lastN()) { el.innerHTML = ''; return; }
+  const total = allItems().length;
+  const due = dueItems();
+  const tomorrow = addDays(todayStr(), 1);
+  const tomorrowCount = allItems().filter(({ it }) => it.box > 0 && it.due === tomorrow).length;
+  const s = state.study, inRev = s && (s.scope === 'review' || s.scope === 'random');
+  let body;
+  if (!total) {
+    body = '<div class="empty">Tekrar testleri, bilgi yazmaya başlayınca burada çıkacak. Öğrendiğin her bilgi 1, 3, 7, 14, 30 ve 60 gün sonra yeniden sorulur.</div>';
+  } else {
+    body = `${due.length ? '' : '<div class="empty">Bugün tekrar zamanı gelen kart yok 🎉 İstersen rastgele kartlarla kendini yokla.</div>'}
+      <div class="task-foot"${due.length ? ' style="margin-top:0"' : ''}>
+        ${due.length ? `<button class="btn" type="button" data-action="study-review">Teste başla (${due.length} kart)</button>` : ''}
+        <button class="btn ghost" type="button" data-action="study-random">Rastgele ${Math.min(QUICK_TEST, total)} kartla test</button>
+        ${tomorrowCount ? `<span class="muted small">Yarın ${tomorrowCount} kart tekrar edilecek</span>` : ''}
+      </div>`;
+  }
+  el.innerHTML = `<section class="task rev">
+      <div class="task-head">
+        <div>
+          <h2><span class="badge">↻</span>Bugünün tekrar testi</h2>
+          <p class="hint">Bildiğin kart daha seyrek (1 → 3 → 7 → 14 → 30 → 60 gün), bilemediğin kart ertesi gün yine sorulur.</p>
+        </div>
+        ${total ? `<span class="status">${due.length ? due.length + ' kart bekliyor' : 'tamam ✓'}</span>` : ''}
+      </div>
+      ${body}
+      <div id="rev-study">${inRev ? studyHtml() : ''}</div>
+    </section>`;
+}
+
+/* ---- 1) Bugünün bilgileri ---- */
+function renderNew() {
+  const d = dayByN(state.active);
+  const cards = Array.from({ length: PER_DAY }, (_, i) => {
+    const it = d.items[i];
+    const [exQ, exA] = EXAMPLES[i % EXAMPLES.length];
+    return `<div class="ncard" data-id="${it ? esc(it.id) : ''}">
+        <div class="nc-top">
+          <span class="num">${i + 1}. bilgi</span>
+          <button type="button" class="icon-btn" data-action="clear-row" title="Kartı temizle" aria-label="${i + 1}. kartı temizle">✕</button>
+        </div>
+        <div>
+          <span class="nc-label">Soru</span>
+          <textarea class="q" rows="2" placeholder="ör. ${esc(exQ)}" aria-label="${i + 1}. soru">${it ? esc(it.q) : ''}</textarea>
+        </div>
+        <div>
+          <span class="nc-label">Cevap</span>
+          <textarea class="a" rows="6" placeholder="ör. ${esc(exA)}" aria-label="${i + 1}. cevap">${it ? esc(it.a) : ''}</textarea>
+        </div>
+        <input type="text" class="src" value="${it ? esc(it.src) : ''}" placeholder="Kaynak (isteğe bağlı) · kitap, makale, kurs, video…" aria-label="${i + 1}. kaynak" autocomplete="off">
+      </div>`;
+  }).join('');
+  $('#sec-new').innerHTML = `<section class="task new">
+      <div class="task-head">
+        <div>
+          <h2><span class="badge">1</span>Bugünün bilgileri</h2>
+          <p class="hint">10 bilgiyi soru–cevap olarak yaz; cevaplar istediğin kadar uzun olabilir. ${d.n + 1}. gün hatırlayacak, ${d.n + 2}. gün işine uygulayacaksın.</p>
+        </div>
+        <span class="status">${d.items.length}/${PER_DAY}</span>
+      </div>
+      <form data-form="items" autocomplete="off">
+        <div class="ncards">${cards}</div>
+        <div class="task-foot">
+          <button class="btn" type="submit">Bilgileri kaydet</button>
+          <span class="muted small">Her kartta soru ve cevap birlikte olmalı. Kaynak isteğe bağlı.</span>
+        </div>
+      </form>
+      ${state.days.length === 1 && !d.items.length
+        ? '<p class="first-hint">İlk kez mi buradasın? <button type="button" data-action="view" data-view="help">Nasıl kullanılır?</button> sayfasına bir göz at.</p>' : ''}
+    </section>`;
+  $$('#sec-new textarea').forEach(autosize);
+  state.dirty = false;
+}
+
+/* ---- 2) Hatırla (bir önceki gün) ---- */
+function renderMem() {
+  const n = state.active, p = dayByN(n - 1);
+  const head = (extra = '') => `<div class="task-head">
+      <div>
+        <h2><span class="badge">2</span>Hatırla${p ? ` — ${p.n}. günün bilgileri` : ''}</h2>
+        <p class="hint">Soruyu oku, cevabı önce kendin söyle, sonra soruya dokunup kontrol et.</p>
+      </div>${extra}</div>`;
+  let html;
+  if (!p) {
+    html = head() + `<div class="empty">${n === 1
+      ? 'Bugün hatırlanacak bilgi yok. 2. günden itibaren burada bir önceki günün bilgileri çıkacak.'
+      : 'Bu gün için hatırlanacak bilgi yok.'}</div>`;
+  } else if (!p.items.length) {
+    html = head() + `<div class="empty">${p.n}. günde bilgi yazılmamış.</div>`;
+  } else {
+    const learned = p.items.filter(i => i.learned).length;
+    const cards = p.items.map((it, i) => {
+      const open = state.flipped.has(it.id);
+      return `<div class="kc ${it.learned ? 'learned' : ''}">
+          <div class="kc-num">${i + 1}. bilgi</div>
+          <button type="button" class="kc-q" data-action="flip" data-id="${esc(it.id)}" aria-expanded="${open}">${esc(it.q)}</button>
+          ${open
+            ? `<div class="kc-a">${esc(it.a)}</div>${it.src ? `<p class="kc-src">Kaynak: ${esc(it.src)}</p>` : ''}`
+            : '<div class="kc-hint">Cevabı görmek için soruya dokun</div>'}
+          <button type="button" class="toggle ${it.learned ? 'on' : ''}" data-action="learn" data-day="${p.n}" data-id="${esc(it.id)}" aria-pressed="${it.learned}">${it.learned ? '✓ Hatırladım' : 'Hatırladım'}</button>
+        </div>`;
+    }).join('');
+    const s = state.study;
+    html = head(`<span class="status">${learned}/${p.items.length} hatırlandı</span>`) +
+      `<div class="kcards">${cards}</div>
+       <div class="task-foot">
+         <button class="btn" type="button" data-action="study-day" data-day="${p.n}">Kendini test et</button>
+         <button class="btn ghost" type="button" data-action="flip-all">Cevapların hepsini aç / kapat</button>
+       </div>
+       <div id="mem-study">${s && s.scope === 'daily' && s.day === p.n ? studyHtml() : ''}</div>`;
+  }
+  $('#sec-mem').innerHTML = `<section class="task mem">${html}</section>`;
+}
+
+/* ---- 3) Uygula (iki gün önce) ---- */
+function renderSen() {
+  const n = state.active, p = dayByN(n - 2);
+  let status = '', body;
+  if (!p) {
+    body = `<div class="empty">${n < 3
+      ? 'Uygulama 3. günden itibaren başlıyor: 3. gün, 1. günün bilgilerini işine nasıl katacağını yazacaksın.'
+      : 'Bu gün için uygulanacak bilgi yok.'}</div>`;
+  } else if (!p.items.length) {
+    body = `<div class="empty">${p.n}. günde bilgi yazılmamış.</div>`;
+  } else {
+    const goal = Math.min(APPLY_GOAL, p.items.length);
+    status = `<span class="status" id="sen-status">${appliedCount(p)}/${p.items.length} yazıldı · hedef ${goal}</span>`;
+    const items = p.items.map(it => {
+      const c = applyInfo(it.apply);
+      return `<div class="ap">
+          <div class="ap-q">${esc(it.q)}</div>
+          ${longText('ap-a', it.a)}
+          <textarea rows="2" data-day="${p.n}" data-id="${esc(it.id)}" placeholder="Bunu bir danışanda ya da kendi antrenmanında nasıl kullanırsın? Ya da kendi cümlenle açıkla…" aria-label="Uygulama notu: ${esc(it.q)}">${esc(it.apply)}</textarea>
+          <div class="check ${c.cls}">${esc(c.text)}</div>
+        </div>`;
+    }).join('');
+    body = `<div class="aplist">${items}</div>
+      <div class="task-foot">
+        <button class="btn" type="button" data-action="save-apply" data-day="${p.n}">Notları kaydet</button>
+        <span class="muted small">Kutudan çıkınca da otomatik kaydedilir</span>
+      </div>`;
+  }
+  $('#sec-sen').innerHTML = `<section class="task sen">
+      <div class="task-head">
+        <div>
+          <h2><span class="badge">3</span>Uygula${p ? ` — ${p.n}. günün bilgileri` : ''}</h2>
+          <p class="hint">En az ${APPLY_GOAL} bilgi için “bunu işimde nasıl kullanırım?” sorusunu cevapla. Hepsini yazarsan daha iyi.</p>
+        </div>${status}
+      </div>${body}
+    </section>`;
+  $$('#sec-sen textarea').forEach(autosize);
+}
+
+/* =====================================================================
+   İŞLEMLER
+   ===================================================================== */
+async function saveItems(silent) {
+  const d = dayByN(state.active);
+  const old = new Map(d.items.map(i => [i.id, i]));
+  const items = []; let incomplete = false;
+  $$('#sec-new .ncard').forEach(r => {
+    const q = r.querySelector('.q').value.trim();
+    const a = r.querySelector('.a').value.trim();
+    const src = r.querySelector('.src').value.trim();
+    r.classList.remove('err');
+    if (!q && !a) return;
+    if (!q || !a) { r.classList.add('err'); incomplete = true; return; }
+    const prev = old.get(r.dataset.id);
+    const same = prev && prev.q.toLocaleLowerCase('tr') === q.toLocaleLowerCase('tr');
+    items.push(same
+      ? { ...prev, q, a, src }
+      : { id: prev ? prev.id : uid(), q, a, src, learned: false, learnedAt: '', apply: '', hard: false, box: 0, due: '', lastReview: '' });
+  });
+  if (incomplete) { toast('Her kartta soruyu ve cevabı birlikte yaz.'); return false; }
+  const keys = items.map(i => i.q.toLocaleLowerCase('tr'));
+  if (new Set(keys).size !== keys.length) { toast('Aynı soruyu iki kez yazmışsın.'); return false; }
+
+  d.items = items;
+  renderNew(); renderMeta(); renderReview();
+  await persist(() => Store.saveDay(d));
+
+  const dup = items.map(it => {
+    const other = state.days.find(o => o.n !== d.n && o.items.some(x => x.q.toLocaleLowerCase('tr') === it.q.toLocaleLowerCase('tr')));
+    return other ? `${other.n}. günde aynı soru var` : null;
+  }).filter(Boolean);
+  if (dup.length) toast('Not: ' + [...new Set(dup)].join(', '));
+  else if (!silent) toast(items.length === PER_DAY ? '10 bilgi kaydedildi 🎉' : `${items.length}/${PER_DAY} bilgi kaydedildi`);
+  return true;
+}
+async function flushItems() { return state.dirty ? saveItems(true) : true; }
+
+async function goto(n) {
+  if (n === state.active || !dayByN(n)) return;
+  if (!(await flushItems())) return;
+  state.active = n; state.flipped.clear();
+  if (state.study && state.study.scope !== 'bank') state.study = null;
+  render();
+}
+
+async function addDay() {
+  if (!(await flushItems())) return;
+  const last = dayByN(lastN());
+  const reasons = [];
+  if (last.items.length < PER_DAY) reasons.push(`${last.n}. günde ${last.items.length}/${PER_DAY} bilgi var`);
+  if (last.date === todayStr()) reasons.push(`bugün zaten ${last.n}. günü açtın`);
+  if (reasons.length && !confirmTwice('new-day', reasons.join(', ') + '. Yine de yeni gün açmak için tekrar tıkla.')) return;
+  const d = newDay(last.n + 1);
+  state.days.push(d); state.active = d.n; state.flipped.clear();
+  if (state.study && state.study.scope !== 'bank') state.study = null;
+  render();
+  await persist(() => Store.saveDay(d));
+  toast(`${d.n}. gün başladı`);
+}
+
+async function deleteDay() {
+  const n = lastN();
+  if (n <= 1) return;
+  if (!confirmTwice('del-' + n, `${n}. gün ve bilgileri silinecek. Onaylamak için tekrar tıkla.`)) return;
+  state.days = state.days.filter(d => d.n !== n);
+  state.active = lastN(); state.flipped.clear(); state.study = null;
+  render();
+  await persist(() => Store.deleteDay(n));
+  toast(`${n}. gün silindi`);
+}
+
+function flip(id) {
+  if (state.flipped.has(id)) state.flipped.delete(id); else state.flipped.add(id);
+  renderMem();
+  const b = $(`#sec-mem .kc-q[data-id="${CSS.escape(id)}"]`); if (b) b.focus({ preventScroll: true });
+}
+function flipAll() {
+  const p = dayByN(state.active - 1); if (!p) return;
+  const ids = p.items.map(i => i.id);
+  const all = ids.every(id => state.flipped.has(id));
+  ids.forEach(id => all ? state.flipped.delete(id) : state.flipped.add(id));
+  renderMem();
+}
+
+async function toggleLearn(dayN, id) {
+  const it = findItem(dayN, id); if (!it) return;
+  if (!it.learned) {
+    it.learned = true; it.learnedAt = todayStr();
+    it.box = Math.max(it.box, 1); it.due = addDays(todayStr(), INTERVALS[it.box]); it.lastReview = todayStr();
+  } else {
+    it.learned = false; it.learnedAt = ''; it.box = 0; it.due = '';
+  }
+  renderMem(); renderMeta(); renderReview();
+  await persist(() => Store.saveDay(dayByN(dayN)));
+}
+
+function updateCheck(t) {
+  const c = applyInfo(t.value);
+  const el = t.parentElement.querySelector('.check');
+  el.className = 'check ' + c.cls; el.textContent = c.text;
+}
+async function saveApply(dayN, silent) {
+  const p = dayByN(dayN); if (!p) return;
+  let changed = false;
+  $$('#sec-sen textarea').forEach(t => {
+    const it = p.items.find(x => x.id === t.dataset.id);
+    const v = t.value.trim();
+    if (it && it.apply !== v) { it.apply = v; changed = true; }
+  });
+  const st = $('#sen-status');
+  if (st) st.textContent = `${appliedCount(p)}/${p.items.length} yazıldı · hedef ${Math.min(APPLY_GOAL, p.items.length)}`;
+  renderMeta();
+  if (changed) await persist(() => Store.saveDay(p));
+  if (!silent) toast(appliedCount(p) >= Math.min(APPLY_GOAL, p.items.length) ? 'Uygulama notları kaydedildi 👏' : 'Notlar kaydedildi');
+}
+
+/* =====================================================================
+   KART KART TEST
+   scope: 'daily' (Hatırla) · 'review' (bugünün tekrarı) · 'random' (rastgele) · 'bank' (Tüm bilgiler)
+   Her cevap aralıklı tekrar planını günceller.
+   ===================================================================== */
+const STUDY_BOX = { daily: '#mem-study', review: '#rev-study', random: '#rev-study', bank: '#study' };
+const STUDY_VIEW = { daily: 'daily', review: 'daily', random: 'daily', bank: 'bank' };
+
+function studyStart(scope, list, day) {
+  if (!list.length) return;
+  state.study = { scope, day: day || null, items: shuffle(list.map(x => ({ day: x.day, id: x.it.id }))), i: 0, revealed: false, known: 0, missed: [] };
+  renderStudy(true);
+}
+
+function studyHtml() {
+  const s = state.study; if (!s) return '';
+  const total = s.items.length;
+  while (s.i < total && !findItem(s.items[s.i].day, s.items[s.i].id)) s.i++;
+  if (s.i >= total) {
+    const missed = s.missed.map(x => findItem(x.day, x.id)).filter(Boolean);
+    return `<div class="study">
+        <div class="quiz-top"><b>Sonuç: ${total} bilgiden ${s.known} tanesini bildin</b><button type="button" class="link-btn" data-action="study-close">Kapat</button></div>
+        ${missed.length
+          ? `<p class="muted" style="margin:8px 0 0">Bilemediklerin yarın yeniden sorulacak:</p><ul class="missed">${missed.map(it => `<li><b>${esc(it.q)}</b></li>`).join('')}</ul>`
+          : '<p class="fb ok">Hepsini bildin! 🎉</p>'}
+        <p class="muted small" style="margin:8px 0 0">Bildiğin kartlar daha ileri bir tarihte yeniden karşına çıkacak.</p>
+        <div class="task-foot">
+          ${missed.length ? '<button class="btn" type="button" data-action="study-missed">Bilemediklerimi hemen tekrar çalış</button>' : ''}
+          <button class="btn ghost" type="button" data-action="study-close">Kapat</button>
+        </div>
+      </div>`;
+  }
+  const x = s.items[s.i], it = findItem(x.day, x.id);
+  const next = ok => {
+    if (ok) { const b = Math.min((it.box || 0) + 1, MAX_BOX); return `${INTERVALS[b]} gün sonra`; }
+    return 'yarın';
+  };
+  return `<div class="study">
+      <div class="quiz-top"><span class="muted small">Kart ${s.i + 1}/${total} · ✓ ${s.known} · ✗ ${s.missed.length}</span><button type="button" class="link-btn" data-action="study-close">Bitir</button></div>
+      <div class="study-card" data-action="study-reveal" role="button" tabindex="0" aria-label="Cevabı göster">
+        <p class="meta">${x.day}. günün bilgisi</p>
+        <div class="q">${esc(it.q)}</div>
+        ${s.revealed
+          ? `<div class="answer">${esc(it.a)}</div>${it.src ? `<p class="kc-src" style="margin-top:8px">Kaynak: ${esc(it.src)}</p>` : ''}${it.apply ? `<p class="wsent">Notun: “${esc(it.apply)}”</p>` : ''}`
+          : '<p class="reveal-hint">Cevabı önce kendin söyle, sonra karta dokun</p>'}
+      </div>
+      ${s.revealed
+        ? `<div class="study-btns">
+             <button class="btn no" type="button" data-action="study-mark" data-ok="0">✗ Bilemedim <span style="font-weight:500;opacity:.85">· ${next(false)}</span></button>
+             <button class="btn yes" type="button" data-action="study-mark" data-ok="1">✓ Bildim <span style="font-weight:500;opacity:.85">· ${next(true)}</span></button>
+           </div>`
+        : '<button class="btn" type="button" data-action="study-reveal" style="width:100%">Cevabı göster</button>'}
+      <p class="kbd">Klavye: Boşluk = cevabı göster · ← bilemedim · → bildim</p>
+    </div>`;
+}
+
+function renderStudy(scroll) {
+  renderMem(); renderReview();
+  const s = state.study;
+  $('#study').innerHTML = s && s.scope === 'bank' ? studyHtml() : '';
+  if (!s) return;
+  const box = $(STUDY_BOX[s.scope]);
+  if (!box) return;
+  const card = $('.study-card', box) || $('.study button', box);
+  if (card) card.focus({ preventScroll: true });
+  if (scroll) box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function studyReveal() {
+  const s = state.study;
+  if (!s || s.revealed || s.i >= s.items.length) return;
+  s.revealed = true; renderStudy();
+}
+async function studyMark(ok) {
+  const s = state.study;
+  if (!s || !s.revealed || s.i >= s.items.length) return;
+  const x = s.items[s.i], it = findItem(x.day, x.id);
+  if (ok) s.known++; else s.missed.push(x);
+  s.i++; s.revealed = false;
+  if (it) schedule(it, ok, s.scope === 'daily');
+  renderStudy(); renderMeta();
+  if (s.scope === 'bank') { renderBankFilters(); renderBankList(); }
+  if (it) await persist(() => Store.saveDay(dayByN(x.day)));
+}
+
+/* =====================================================================
+   BÖLÜMLER
+   ===================================================================== */
+const VIEW_HASH = { daily: '', bank: '#bilgiler', stats: '#istatistik', help: '#yardim' };
+async function setView(v) {
+  if (!(v in VIEW_HASH)) v = 'daily';
+  if (state.view === 'daily' && v !== 'daily') await flushItems();
+  state.view = v;
+  Object.keys(VIEW_HASH).forEach(k => { $('#view-' + k).hidden = k !== v; });
+  $$('.view-tab').forEach(b => { const on = b.dataset.view === v; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  if (v === 'daily') { $$('#sec-new textarea, #sec-sen textarea').forEach(autosize); }
+  if (v === 'bank') renderBank();
+  if (v === 'stats') renderStatsView();
+  try { history.replaceState(null, '', location.pathname + location.search + VIEW_HASH[v]); } catch (e) {}
+}
+function viewFromHash() {
+  const v = Object.keys(VIEW_HASH).find(k => k !== 'daily' && VIEW_HASH[k] === location.hash) || 'daily';
+  if (v !== state.view) setView(v);
+}
+
+/* =====================================================================
+   TÜM BİLGİLER
+   ===================================================================== */
+const FILTERS = [['all', 'Hepsi'], ['due', '↻ Tekrarı gelen'], ['todo', 'Hatırlanmamış'], ['noapply', 'Uygulanmamış'], ['hard', '🔁 Zor']];
+function filterItems(list, f) {
+  const today = todayStr();
+  if (f === 'due') return list.filter(x => isDue(x.it, x.day, today));
+  if (f === 'todo') return list.filter(x => !x.it.learned);
+  if (f === 'noapply') return list.filter(x => !x.it.apply.trim());
+  if (f === 'hard') return list.filter(x => x.it.hard);
+  return list;
+}
+function bankList() {
+  const { q, filter, sort } = state.bank;
+  let list = filterItems(allItems(), filter);
+  const nq = q.trim().toLocaleLowerCase('tr');
+  if (nq) list = list.filter(x => [x.it.q, x.it.a, x.it.src, x.it.apply].some(s => s.toLocaleLowerCase('tr').includes(nq)));
+  if (sort === 'new') list.sort((a, b) => b.day - a.day);
+  else if (sort === 'old') list.sort((a, b) => a.day - b.day);
+  else list.sort((a, b) => (a.it.due || '0000') < (b.it.due || '0000') ? -1 : (a.it.due || '0000') > (b.it.due || '0000') ? 1 : a.day - b.day);
+  return list;
+}
+function renderBank() { renderBankFilters(); renderBankList(); renderStudy(); }
+
+function renderBankFilters() {
+  const base = allItems();
+  $('#bank-filters').innerHTML = FILTERS.map(([k, l]) =>
+    `<button type="button" class="fchip ${state.bank.filter === k ? 'active' : ''}" data-action="bank-filter" data-f="${k}" aria-pressed="${state.bank.filter === k}">${l} <span>${filterItems(base, k).length}</span></button>`
+  ).join('');
+}
+function nextReviewText(it) {
+  if (!it.learned || !it.due) return 'Henüz öğrenilmedi';
+  const today = todayStr();
+  if (it.due <= today) return 'Tekrar zamanı geldi';
+  if (it.due === addDays(today, 1)) return 'Sonraki tekrar: yarın';
+  return 'Sonraki tekrar: ' + shortDate(it.due);
+}
+function renderBankList() {
+  const all = allItems(), list = bankList();
+  $('#bank-status').textContent = `${all.length} bilgi`;
+  if (!all.length) {
+    $('#bank-actions').innerHTML = '';
+    $('#bank-list').innerHTML = '<div class="empty">Henüz bilgi yok. <b>Günlük çalışma</b> sekmesinden ilk 10 bilgini yaz; hepsi burada toplanacak.</div>';
+    return;
+  }
+  $('#bank-actions').innerHTML = list.length
+    ? `<button class="btn" type="button" data-action="study-bank">▶ Bu listeyle test (${list.length})</button>
+       ${list.length !== all.length ? `<span class="muted small">${all.length} bilgiden ${list.length} tanesi gösteriliyor</span>` : ''}`
+    : '';
+  $('#bank-list').innerHTML = list.length
+    ? `<div class="wlist">${list.map(({ it, day }) => `
+        <div class="wrow">
+          <button type="button" class="daytag" data-action="goto-day" data-n="${day}" title="${day}. güne git">${day}. gün</button>
+          <div>
+            <div class="w-q">${esc(it.q)}</div>
+            ${longText('w-a', it.a)}
+            ${it.src ? `<div class="w-meta">Kaynak: ${esc(it.src)}</div>` : ''}
+            ${it.apply ? `<p class="wsent">Uygulama: “${esc(it.apply)}”</p>` : ''}
+            <div class="w-meta">${nextReviewText(it)}</div>
+          </div>
+          <div class="wflags">
+            <span class="flag mem ${it.learned ? 'on' : ''}">${it.learned ? '✓' : '○'} hatırlandı</span>
+            <span class="flag sen ${it.apply.trim() ? 'on' : ''}">${it.apply.trim() ? '✓' : '○'} uygulandı</span>
+            <button type="button" class="flag hard ${it.hard ? 'on' : ''}" data-action="toggle-hard" data-day="${day}" data-id="${esc(it.id)}" aria-pressed="${it.hard}" title="Zor işaretini aç/kapat">🔁 zor</button>
+          </div>
+        </div>`).join('')}</div>`
+    : '<div class="empty">Bu arama ya da filtreyle eşleşen bilgi yok.</div>';
+}
+
+async function toggleHard(day, id) {
+  const it = findItem(day, id); if (!it) return;
+  it.hard = !it.hard;
+  renderBankFilters(); renderBankList();
+  await persist(() => Store.saveDay(dayByN(day)));
+}
+
+/* =====================================================================
+   İSTATİSTİK
+   ===================================================================== */
+const MILESTONES = [10, 25, 50, 100, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 5000, 10000];
+const C_ADDED = '#2f55d4', C_LEARNED = '#b85f00';
+
+function learnedDate(it, dayN) {
+  if (!it.learned) return '';
+  if (it.learnedAt) return it.learnedAt;
+  return (dayByN(dayN + 1) || dayByN(dayN)).date;
+}
+
+function computeStats() {
+  const today = todayStr();
+  const all = allItems();
+  const learnedList = all.filter(x => x.it.learned).map(x => learnedDate(x.it, x.day));
+  const addedList = all.map(x => dayByN(x.day).date);
+  const learned = learnedList.length, total = all.length;
+
+  const active = new Set([...state.days.map(d => d.date), ...learnedList, ...all.map(x => x.it.lastReview).filter(Boolean)]);
+  const studiedToday = active.has(today);
+  let streak = 0, cur = studiedToday ? today : addDays(today, -1);
+  while (active.has(cur)) { streak++; cur = addDays(cur, -1); }
+
+  const allDates = [...addedList, ...learnedList, today].filter(Boolean).sort();
+  let start = allDates[0];
+  const end = allDates[allDates.length - 1];
+  if ((Date.parse(end) - Date.parse(start)) / DAY_MS > 730) start = addDays(end, -730);
+  const countBy = list => list.reduce((m, d) => (m[d] = (m[d] || 0) + 1, m), {});
+  const addMap = countBy(addedList), learnMap = countBy(learnedList);
+  let ca = addedList.filter(d => d < start).length, cl = learnedList.filter(d => d < start).length;
+  const series = { dates: [], added: [], learned: [] };
+  for (let d = start; d <= end; d = addDays(d, 1)) {
+    ca += addMap[d] || 0; cl += learnMap[d] || 0;
+    series.dates.push(d); series.added.push(ca); series.learned.push(cl);
+  }
+
+  // Önümüzdeki 7 günün tekrar sayıları (bugün = şu an bekleyenler)
+  const upcoming = Array.from({ length: 7 }, (_, k) => {
+    const date = addDays(today, k);
+    const count = k === 0 ? dueItems().length : all.filter(x => x.it.box > 0 && x.it.due === date).length;
+    return { date, count };
+  });
+
+  const next = MILESTONES.find(m => m > learned) || Math.ceil((learned + 1) / 5000) * 5000;
+  const prev = [...MILESTONES].reverse().find(m => m <= learned) || 0;
+  return {
+    total, learned, today,
+    pct: total ? Math.round(learned / total * 100) : 0,
+    week: learnedList.filter(d => d >= addDays(today, -6) && d <= today).length,
+    applied: all.filter(x => x.it.apply.trim()).length,
+    hard: all.filter(x => x.it.hard).length,
+    lasting: all.filter(x => x.it.box >= 4).length,
+    due: dueItems().length,
+    completeDays: state.days.filter(d => !progress(d.n).includes('todo')).length,
+    streak, studiedToday, next, prev, series, upcoming
+  };
+}
+
+let lastSeries = null;
+function renderStatsView() {
+  const s = computeStats();
+  const box = $('#stats-body');
+  if (!s.total) {
+    lastSeries = null;
+    box.innerHTML = '<div class="empty">Henüz bilgi yazmadın. <b>Günlük çalışma</b> sekmesinden ilk 10 bilgini yazınca istatistiklerin burada görünecek.</div>';
+    return;
+  }
+  const tile = (l, v, sub) => `<div class="tile"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${sub}</div></div>`;
+  const goalPct = Math.min(100, Math.round((s.learned - s.prev) / (s.next - s.prev) * 100));
+  const upcoming = s.upcoming.map((u, k) => `<div class="up-day ${k === 0 ? 'today' : ''}">
+      <div class="n">${u.count}</div>
+      <div class="d">${k === 0 ? 'bugün' : k === 1 ? 'yarın' : esc(shortDate(u.date))}</div>
+    </div>`).join('');
+  const rows = state.days.slice().reverse().map(d => {
+    const n = d.items.length;
+    return `<tr>
+        <td><button type="button" class="daytag" data-action="goto-day" data-n="${d.n}">${d.n}. gün</button></td>
+        <td>${esc(shortDate(d.date))}</td>
+        <td class="num">${n}</td>
+        <td class="num">${d.items.filter(i => i.learned).length}/${n}</td>
+        <td class="num">${appliedCount(d)}/${n}</td>
+      </tr>`;
+  }).join('');
+  const sr = s.series;
+  const tableRows = sr.dates.map((d, i) => `<tr><td>${esc(shortDate(d))}</td><td class="num">${sr.added[i]}</td><td class="num">${sr.learned[i]}</td></tr>`).reverse().join('');
+
+  box.innerHTML = `
+    <div class="hero">
+      <div>
+        <div class="hero-label">Öğrendiğin bilgi</div>
+        <div class="hero-num">${s.learned}</div>
+        <div class="hero-sub">Toplam ${s.total} bilgi · öğrenme oranı %${s.pct}<br>
+          ${s.week ? `<span class="up">Son 7 günde +${s.week}</span>` : 'Son 7 günde yeni bilgi öğrenmedin'}</div>
+      </div>
+      <div class="goal">
+        <div class="goal-top"><b>Sıradaki hedef: ${s.next} bilgi</b><span class="muted">${s.next - s.learned} kaldı</span></div>
+        <div class="meter" role="progressbar" aria-label="Sıradaki hedefe ilerleme" aria-valuemin="${s.prev}" aria-valuemax="${s.next}" aria-valuenow="${s.learned}"><i style="width:${goalPct}%"></i></div>
+        <div class="muted small">${s.prev ? `Ulaştığın son hedef: ${s.prev} bilgi 🎉` : 'İlk hedefin 10 bilgi. Başarabilirsin!'}</div>
+      </div>
+    </div>
+    <div class="tiles">
+      ${tile('Bugün tekrar', s.due, s.due ? 'Günlük çalışma’da teste başla' : 'bugünkü tekrarlar bitti ✓')}
+      ${tile('Kalıcı hafızada', s.lasting, '7 günlük tekrarı da geçen')}
+      ${tile('Toplam bilgi', s.total, `${state.days.length} günde yazıldı`)}
+      ${tile('Henüz hatırlanmamış', s.total - s.learned, s.total - s.learned ? 'testlerde tekrar gelecek' : 'hepsi hatırlandı 🎉')}
+      ${tile('Uygulanan', s.applied, 'uygulama notu yazdın')}
+      ${tile('Zor bilgi', s.hard, s.hard ? 'sık sık sorulacak' : 'zor bilgi yok')}
+      ${tile('Tamamlanan gün', s.completeDays, 'üç görevi de biten gün')}
+      ${tile('Çalışma serisi', s.streak + ' gün', s.studiedToday ? 'bugün çalıştın ✓' : 'bugün henüz çalışmadın')}
+    </div>
+    <div class="chart-block">
+      <h3>Önümüzdeki 7 günün tekrarları</h3>
+      <p class="muted small" style="margin:4px 0 0">Her gün kaç kartın yeniden sorulacağı. Bugün sayısına bekleyen eski kartlar da dahil.</p>
+      <div class="upcoming">${upcoming}</div>
+    </div>
+    <div class="chart-block">
+      <div class="chart-head">
+        <h3>Bilgi sayısı zaman içinde</h3>
+        <div class="legend" aria-hidden="true">
+          <span><i class="key" style="background:${C_ADDED}"></i>Yazılan</span>
+          <span><i class="key" style="background:${C_LEARNED}"></i>Öğrenilen</span>
+        </div>
+      </div>
+      <div class="chart-wrap" id="chart"></div>
+      <details class="tbl"><summary>Grafiği tablo olarak gör</summary>
+        <table class="data"><thead><tr><th>Tarih</th><th class="num">Yazılan (toplam)</th><th class="num">Öğrenilen (toplam)</th></tr></thead><tbody>${tableRows}</tbody></table>
+      </details>
+    </div>
+    <div class="chart-block">
+      <h3>Gün gün</h3>
+      <p class="muted small" style="margin:4px 0 0">Her satır, o gün yazdığın bilgilerden kaçını hatırladığını ve kaçını uyguladığını gösterir.</p>
+      <table class="data"><thead><tr><th>Gün</th><th>Tarih</th><th class="num">Yazılan</th><th class="num">Hatırlanan</th><th class="num">Uygulanan</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  lastSeries = sr;
+  drawChart($('#chart'), sr);
+}
+
+function niceScale(max) {
+  const steps = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000, 10000];
+  const step = steps.find(st => max / st <= 5) || 10000;
+  return { step, top: Math.max(step, Math.ceil(max / step) * step) };
+}
+
+function drawChart(el, data) {
+  const n = data.dates.length;
+  if (n < 2) {
+    el.innerHTML = '<div class="empty">Grafik, ertesi gün çalışmaya devam edince dolmaya başlar. Şimdilik bugünün sayıları üstte.</div>';
+    return;
+  }
+  const W = Math.max(300, Math.round(el.clientWidth || 640)), H = 250;
+  const m = { l: 38, r: 44, t: 16, b: 30 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const { step, top } = niceScale(Math.max(1, ...data.added, ...data.learned));
+  const x = i => m.l + i * iw / (n - 1);
+  const y = v => m.t + ih - (v / top) * ih;
+  const f = v => v.toFixed(1);
+  let g = '';
+  for (let v = 0; v <= top; v += step) {
+    g += `<line class="${v ? 'grid' : 'axis'}" x1="${m.l}" x2="${W - m.r}" y1="${f(y(v))}" y2="${f(y(v))}"/>`;
+    g += `<text class="tick" x="${m.l - 8}" y="${f(y(v) + 4)}" text-anchor="end">${v}</text>`;
+  }
+  const nt = Math.min(n, W < 480 ? 4 : 6);
+  const seen = new Set();
+  for (let k = 0; k < nt; k++) {
+    const i = Math.round(k * (n - 1) / (nt - 1));
+    if (seen.has(i)) continue; seen.add(i);
+    const anchor = k === 0 ? 'start' : k === nt - 1 ? 'end' : 'middle';
+    g += `<text class="tick" x="${f(x(i))}" y="${H - 8}" text-anchor="${anchor}">${esc(shortDate(data.dates[i]))}</text>`;
+  }
+  const path = arr => arr.map((v, i) => (i ? 'L' : 'M') + f(x(i)) + ' ' + f(y(v))).join(' ');
+  const last = n - 1, ya = y(data.added[last]), yl = y(data.learned[last]);
+  const ends = Math.abs(ya - yl) >= 16
+    ? `<text class="endlbl" x="${f(x(last) + 9)}" y="${f(ya + 4)}">${data.added[last]}</text>
+       <text class="endlbl" x="${f(x(last) + 9)}" y="${f(yl + 4)}">${data.learned[last]}</text>` : '';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" tabindex="0" role="img"
+      aria-label="Zaman içinde yazılan ve öğrenilen bilgi sayısı. Bugün: ${data.added[last]} yazılan, ${data.learned[last]} öğrenilen. Sol ve sağ ok tuşlarıyla tarihler arasında gezinebilirsin.">
+      ${g}
+      <path d="${path(data.learned)} L${f(x(last))} ${f(y(0))} L${f(x(0))} ${f(y(0))} Z" fill="${C_LEARNED}" fill-opacity=".1"/>
+      <path class="ln" d="${path(data.added)}" stroke="${C_ADDED}"/>
+      <path class="ln" d="${path(data.learned)}" stroke="${C_LEARNED}"/>
+      <circle cx="${f(x(last))}" cy="${f(ya)}" r="4" fill="${C_ADDED}" stroke="#fffdf8" stroke-width="2"/>
+      <circle cx="${f(x(last))}" cy="${f(yl)}" r="4" fill="${C_LEARNED}" stroke="#fffdf8" stroke-width="2"/>
+      ${ends}
+      <g class="hover" visibility="hidden">
+        <line class="xhair" y1="${m.t}" y2="${f(y(0))}"/>
+        <circle class="ha" r="4" fill="${C_ADDED}" stroke="#fffdf8" stroke-width="2"/>
+        <circle class="hl" r="4" fill="${C_LEARNED}" stroke="#fffdf8" stroke-width="2"/>
+      </g>
+      <rect x="${m.l}" y="0" width="${iw}" height="${H}" fill="transparent"/>
+    </svg>
+    <div class="tip" hidden></div>`;
+
+  const svg = $('svg', el), tip = $('.tip', el), hov = $('.hover', svg);
+  const xh = $('.xhair', hov), ha = $('.ha', hov), hl = $('.hl', hov);
+  let idx = -1;
+  const show = i => {
+    idx = Math.max(0, Math.min(n - 1, i));
+    const cx = f(x(idx));
+    xh.setAttribute('x1', cx); xh.setAttribute('x2', cx);
+    ha.setAttribute('cx', cx); ha.setAttribute('cy', f(y(data.added[idx])));
+    hl.setAttribute('cx', cx); hl.setAttribute('cy', f(y(data.learned[idx])));
+    hov.setAttribute('visibility', 'visible');
+    tip.replaceChildren();
+    const d = document.createElement('div'); d.className = 'd'; d.textContent = fmtDate(data.dates[idx]); tip.append(d);
+    [['Yazılan', data.added[idx], C_ADDED], ['Öğrenilen', data.learned[idx], C_LEARNED]].forEach(([label, val, col]) => {
+      const r = document.createElement('div'); r.className = 'r';
+      const k = document.createElement('i'); k.className = 'k'; k.style.background = col;
+      const b = document.createElement('b'); b.textContent = val;
+      const sp = document.createElement('span'); sp.className = 'muted'; sp.textContent = label;
+      r.append(k, b, sp); tip.append(r);
+    });
+    tip.hidden = false;
+    const scale = svg.getBoundingClientRect().width / W || 1;
+    const px = x(idx) * scale, tw = tip.offsetWidth;
+    tip.style.left = (px + 14 + tw > el.clientWidth ? px - 14 - tw : px + 14) + 'px';
+  };
+  const hide = () => { hov.setAttribute('visibility', 'hidden'); tip.hidden = true; };
+  const fromEvent = e => {
+    const r = svg.getBoundingClientRect();
+    const px = (e.clientX - r.left) * (W / r.width);
+    return Math.round((px - m.l) / iw * (n - 1));
+  };
+  svg.addEventListener('pointermove', e => show(fromEvent(e)));
+  svg.addEventListener('pointerdown', e => show(fromEvent(e)));
+  svg.addEventListener('pointerleave', hide);
+  svg.addEventListener('focus', () => show(idx < 0 ? n - 1 : idx));
+  svg.addEventListener('blur', hide);
+  svg.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(idx - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); show(idx + 1); }
+  });
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if (state.view === 'stats' && lastSeries) drawChart($('#chart'), lastSeries); }, 150);
+});
+
+/* ---- Yedekleme ---- */
+async function exportJson() {
+  const data = { app: 'bilgi-defteri', version: 2, exportedAt: new Date().toISOString(), days: state.days };
+  const json = JSON.stringify(data, null, 2);
+  const filename = `bilgi-defteri-${todayStr()}.json`;
+  if (inArtifact()) {
+    const dl = await window.claude.use('downloads');
+    if (dl) {
+      try { await dl.save({ filename, data: json }); }
+      catch (e) { if (!e || e.code !== 'declined') toast('Yedek indirilemedi: ' + ((e && (e.message || e.code)) || e)); }
+      return;
+    }
+  }
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+async function importFile(file) {
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    const days = normalize(Array.isArray(data) ? data : data.days);
+    if (!days.some(d => d.items.length)) throw new Error('bu dosyada bilgi bulunamadı');
+    state.days = days; state.active = lastN(); state.study = null; state.flipped.clear();
+    render();
+    await persist(() => Store.replaceAll(state.days));
+    toast(`${days.length} gün içe aktarıldı`);
+  } catch (e) { toast('İçe aktarılamadı: ' + e.message); }
+  finally { $('#import-file').value = ''; }
+}
+async function resetAll() {
+  if (!confirmTwice('reset', 'Tüm günler ve bilgiler silinecek. Emin misin? Onaylamak için tekrar tıkla.')) return;
+  state.days = [newDay(1)]; state.active = 1; state.study = null; state.flipped.clear();
+  render();
+  await persist(() => Store.replaceAll(state.days));
+  toast('Defter sıfırlandı');
+}
+
+/* =====================================================================
+   OLAYLAR
+   ===================================================================== */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-action]');
+  if (!t) return;
+  switch (t.dataset.action) {
+    case 'goto': goto(+t.dataset.n); break;
+    case 'new-day': addDay(); break;
+    case 'delete-day': deleteDay(); break;
+    case 'clear-row': {
+      const r = t.closest('.ncard');
+      r.querySelectorAll('input, textarea').forEach(i => { i.value = ''; });
+      r.classList.remove('err'); state.dirty = true;
+      autosize(r.querySelector('.a'));
+      r.querySelector('.q').focus(); break;
+    }
+    case 'expand': {
+      const host = t.parentElement;
+      const open = host.classList.toggle('open');
+      t.textContent = open ? 'Daha az göster' : 'Tamamını göster';
+      break;
+    }
+    case 'flip': flip(t.dataset.id); break;
+    case 'flip-all': flipAll(); break;
+    case 'learn': toggleLearn(+t.dataset.day, t.dataset.id); break;
+    case 'save-apply': saveApply(+t.dataset.day, false); break;
+    case 'study-day': {
+      const p = dayByN(+t.dataset.day);
+      if (p) studyStart('daily', p.items.map(it => ({ it, day: p.n })), p.n);
+      break;
+    }
+    case 'study-review': studyStart('review', dueItems()); break;
+    case 'study-random': studyStart('random', shuffle(allItems()).slice(0, QUICK_TEST)); break;
+    case 'study-bank': studyStart('bank', bankList()); break;
+    case 'study-reveal': studyReveal(); break;
+    case 'study-mark': studyMark(t.dataset.ok === '1'); break;
+    case 'study-missed': {
+      const s = state.study;
+      studyStart(s.scope, s.missed.map(x => ({ day: x.day, it: findItem(x.day, x.id) })).filter(x => x.it), s.day);
+      break;
+    }
+    case 'study-close': state.study = null; renderStudy(); renderMeta(); break;
+    case 'view': setView(t.dataset.view); window.scrollTo({ top: 0 }); break;
+    case 'bank-filter': state.bank.filter = t.dataset.f; renderBankFilters(); renderBankList(); break;
+    case 'goto-day': setView('daily').then(() => goto(+t.dataset.n)); window.scrollTo({ top: 0 }); break;
+    case 'toggle-hard': toggleHard(+t.dataset.day, t.dataset.id); break;
+    case 'export': exportJson(); break;
+    case 'reset': resetAll(); break;
+    case 'logout': FirebaseStore.logout(); break;
+  }
+});
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.dataset.form === 'items') saveItems(false);
+});
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.closest('#sec-new .ncard')) { state.dirty = true; t.closest('.ncard').classList.remove('err'); }
+  if (t.matches('#sec-new textarea, #sec-sen textarea')) autosize(t);
+  if (t.matches('#sec-sen textarea')) updateCheck(t);
+  if (t.id === 'bank-q') { state.bank.q = t.value; renderBankList(); }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('#sec-sen textarea')) saveApply(+t.dataset.day, true);
+  if (t.id === 'import-file') importFile(t.files[0]);
+  if (t.id === 'bank-sort') { state.bank.sort = t.value; renderBankList(); }
+});
+
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  // Soru ve kaynak kutularında Enter: sonraki kutuya geç (cevap kutusunda Enter yeni satır açar)
+  if (e.key === 'Enter' && !e.shiftKey && t.matches('#sec-new .q, #sec-new .src')) {
+    e.preventDefault();
+    const fields = $$('#sec-new .ncard input, #sec-new .ncard textarea');
+    const i = fields.indexOf(t);
+    if (i < fields.length - 1) fields[i + 1].focus(); else saveItems(false);
+  }
+  // Kart kart test: Boşluk = göster, ← bilemedim, → bildim
+  const s = state.study;
+  if (s && s.i < s.items.length && STUDY_VIEW[s.scope] === state.view && !t.matches('input, textarea, select, button')) {
+    if ((e.key === ' ' || e.key === 'Enter') && !s.revealed) { e.preventDefault(); studyReveal(); }
+    else if (s.revealed && e.key === 'ArrowRight') { e.preventDefault(); studyMark(true); }
+    else if (s.revealed && e.key === 'ArrowLeft') { e.preventDefault(); studyMark(false); }
+  }
+});
+
+window.addEventListener('beforeunload', e => { if (state.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+/* =====================================================================
+   BAŞLAT
+   ===================================================================== */
+async function init() {
+  const slow = setTimeout(() => {
+    const l = $('#loading'); if (l) l.textContent = 'Veriler hâlâ yükleniyor… İnternet bağlantını kontrol et.';
+  }, 10000);
+  if (inArtifact()) {
+    try { await ArtifactStore.init(); Store = ArtifactStore; }
+    catch (e) { console.error(e); toast('Claude hesabına bağlanılamadı, veriler bu tarayıcıda tutulacak.'); }
+  } else if (CONFIG.USE_FIREBASE) {
+    try { await FirebaseStore.init(); Store = FirebaseStore; }
+    catch (e) { console.error(e); toast('Firebase’e bağlanılamadı, veriler bu tarayıcıda tutulacak.'); }
+  }
+  let days = [];
+  try { days = await Store.loadDays(); }
+  catch (e) {
+    clearTimeout(slow); console.error(e);
+    $('#loading').textContent = 'Veriler yüklenemedi (' + (e.message || e.code || e) + '). Sayfayı yenileyip tekrar dene.';
+    return;
+  }
+  clearTimeout(slow);
+  state.days = normalize(days);
+  if (!state.days.length) {
+    state.days.push(newDay(1));
+    await persist(() => Store.saveDay(state.days[0]));
+  }
+  state.active = lastN();
+  $('#loading').remove();
+  $('#store-label').textContent = Store.label;
+  $('#storage-note').innerHTML = Store.note;
+  $('#logout-btn').hidden = Store !== FirebaseStore;
+  render();
+  viewFromHash();
+  window.addEventListener('hashchange', viewFromHash);
+}
+init();
+})();
+</script>
+</body>
+</html>
